@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS violation_records(
+    id BIGSERIAL PRIMARY KEY,
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
+    name VARCHAR NOT NULL,
+    location VARCHAR NOT NULL
+);
