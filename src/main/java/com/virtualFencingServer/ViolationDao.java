@@ -4,10 +4,13 @@ package com.virtualFencingServer;
 import com.google.common.annotations.VisibleForTesting;
 import com.virtualFencingServer.model.ViolationRecord;
 import com.virtualFencingServer.model.ViolationRecordQueryParameters;
+import com.virtualFencingServer.model.ViolationRecordRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
@@ -78,76 +81,38 @@ public class ViolationDao {
         return namedJdbc.query("SELECT * FROM violation_records" + filter, queryArgMatcher, violationRowMapper);
     }
 
-//
-//    /**
-//     * Synchronised to avoid race conditions that may occur when multiple records are added at the same time.
-//     * @throws org.springframework.dao.DuplicateKeyException when attempting to insert using a patch version
-//     * that already exists. This would most likely happen when trying to insert multiple release builds for a
-//     * given set of {projectName, majorVersion, minorVersion} combinations.
-//     */
-//    public synchronized VersionRecord addVersionRecord(
-//            boolean isReleaseBuild,
-//            Optional<String> author,
-//            Optional<String> tentativeProjectName,
-//            int majorVersion,
-//            int minorVersion,
-//            String commitHash,
-//            boolean dirty
-//    ) {
-//
-//        String projectName = tentativeProjectName.orElse(DEFAULT_PROJECT_NAME);
-//        int patchVersion = isReleaseBuild ? 0 : getPatchVersion(projectName, majorVersion, minorVersion);
-//
-//        GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
-//        namedJdbc.update(
-//                "INSERT INTO version_records (timestamp, author, project_name, major, minor, patch, commit_hash, dirty)" +
-//                        " VALUES (:timestamp,:author,:projectName,:majorVersion,:minorVersion,:patchVersion,:commitHash,:dirty)",
-//                new MapSqlParameterSource()
-//                    .addValue("timestamp", Timestamp.from(Instant.now(clock)))
-//                    .addValue("author", author.orElse(null))
-//                    .addValue("projectName", projectName)
-//                    .addValue("majorVersion", majorVersion)
-//                    .addValue("minorVersion", minorVersion)
-//                    .addValue("patchVersion", patchVersion)
-//                    .addValue("commitHash", commitHash)
-//                    .addValue("dirty", dirty)
-//                    ,
-//                generatedKeyHolder,
-//                new String[]{"id"}
-//        );
-//
-//        // Return the inserted version record.
-//        return getVersionRecordById(generatedKeyHolder.getKey());
-//    }
-//
-//    @VisibleForTesting
-//    VersionRecord getVersionRecordById(Number id) {
-//        return namedJdbc.queryForObject(
-//                "SELECT * FROM version_records WHERE id = :id",
-//                Map.of("id", id),
-//                firmwareVersionRowMapper
-//        );
-//    }
-//
-//    /**
-//     * Searches the database to find the highest patch version for a given project name + major + minor version combination.
-//     * @return The next patch version or 1 if no entry exists.
-//     * (0 is reserved for production releases).
-//     */
-//    @VisibleForTesting
-//    int getPatchVersion(String projectName, int majorVersion, int minorVersion) {
-//        Integer highestPatchNum = namedJdbc.queryForObject(
-//                "SELECT MAX(patch) FROM version_records WHERE project_name = :projectName AND " +
-//                        "major = :majorVersion AND minor = :minorVersion ",
-//                Map.of(
-//                        "projectName", projectName,
-//                        "majorVersion", majorVersion,
-//                        "minorVersion", minorVersion
-//                ),
-//                Integer.class
-//        );
-//        return highestPatchNum == null ? 1 : highestPatchNum + 1;
-//    }
+
+    /**
+     * Synchronised to avoid race conditions that may occur when multiple records are added at the same time.
+     * @throws org.springframework.dao.DuplicateKeyException when attempting to insert using a patch version
+     * that already exists. This would most likely happen when trying to insert multiple release builds for a
+     * given set of {projectName, majorVersion, minorVersion} combinations.
+     */
+    public synchronized ViolationRecord addViolationRecord(ViolationRecordRequest violationRecordRequest) {
+
+        GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
+        namedJdbc.update(
+                "INSERT INTO violation_records (timestamp, name, location) VALUES (:timestamp,:name,:location)",
+                new MapSqlParameterSource()
+                        .addValue("timestamp", Timestamp.from(Instant.now(clock)))
+                        .addValue("name", violationRecordRequest.getName())
+                        .addValue("location", violationRecordRequest.getLocation()),
+                generatedKeyHolder,
+                new String[]{"id"}
+        );
+
+        // Return the inserted version record.
+        return getVersionRecordById(generatedKeyHolder.getKey());
+    }
+
+    @VisibleForTesting
+    ViolationRecord getVersionRecordById(Number id) {
+        return namedJdbc.queryForObject(
+                "SELECT * FROM violation_records WHERE id = :id",
+                Map.of("id", id),
+                violationRowMapper
+        );
+    }
 
     /**
      * Converts SQL responses into VersionRecords.

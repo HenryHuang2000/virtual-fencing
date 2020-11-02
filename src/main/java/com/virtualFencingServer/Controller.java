@@ -3,10 +3,8 @@ package com.virtualFencingServer;
 
 import com.virtualFencingServer.model.ViolationRecord;
 import com.virtualFencingServer.model.ViolationRecordQueryParameters;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import com.virtualFencingServer.model.ViolationRecordRequest;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -51,42 +49,14 @@ public class Controller {
         return violationDao.getViolationRecords(queryParameters);
     }
 
-//    /**
-//     * Used to generate a debug (non-release) version record. These versions are not intended to be released to the field.
-//     * @param versionRecordRequest is used to build the version record.
-//     * @return A copy of the record saved in the database.
-//     */
-//    @PostMapping("/records")
-//    public VersionRecord addDebugVersionRecord(@RequestBody Optional<VersionRecordRequest> versionRecordRequest) {
-//        return addVersionRecord(versionRecordRequest, false);
-//    }
-//
-//    /**
-//     * Used to generate a release build version record.
-//     * @param versionRecordRequest is used to build the version record.     *
-//     * @return A copy of the record saved in the database.
-//     */
-//    @PostMapping("/records/release")
-//    public VersionRecord addReleaseVersionRecord(@RequestBody Optional<VersionRecordRequest> versionRecordRequest) {
-//        return addVersionRecord(versionRecordRequest, true);
-//    }
-//
-//    private VersionRecord addVersionRecord(Optional<VersionRecordRequest> versionRecordRequest, boolean isReleaseBuild) {
-//        try {
-//            // Check that the incoming version record request has valid fields.
-//            VersionRecordRequest request = versionRecordRequest
-//                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Commit hash can not be null"));
-//            return versionDao.addVersionRecord(
-//                    isReleaseBuild,
-//                    request.getAuthor(),
-//                    request.getProjectName(),
-//                    request.getMajorVersion(),
-//                    request.getMinorVersion(),
-//                    request.getCommitHash(),
-//                    request.getDirty()
-//            );
-//        } catch (DuplicateKeyException e) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The requested patch already exists.");
-//        }
-//    }
+    /**
+     * Used to generate a violation record.
+     * @param violationRecordRequest is used to build the violation record.
+     * @return A copy of the record saved in the database.
+     */
+    @PostMapping("/records")
+    public ViolationRecord addVersionRecord(ViolationRecordRequest violationRecordRequest) {
+
+        return violationDao.addViolationRecord(violationRecordRequest);
+    }
 }
