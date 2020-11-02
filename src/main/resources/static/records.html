@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Violation Records</title>
+    <style>
+
+        .header {
+            padding: 20px;
+            background: #ebebeb;
+            color: black;
+            font-size: 30px;
+        }
+
+        table {
+            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+            table-layout:fixed;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        td, th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        tr:nth-child(even){background-color: #f2f2f2;}
+
+        tr:hover {background-color: #ddd;}
+
+        th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th[data-sortDirection='asc']::after {
+            font-family: 'Material Icons';
+            content: "arrow_drop_up";
+            -webkit-font-feature-settings: 'liga';
+            float: right;
+        }
+
+        th[data-sortDirection='desc']::after {
+            font-family: 'Material Icons';
+            content: "arrow_drop_down";
+            -webkit-font-feature-settings: 'liga';
+            float: right;
+        }
+
+        h1, h3 {
+            font-family: Helvetica
+        }
+
+        label {
+            display: inline-block;
+            width: 105px;
+        }
+
+        input, select {
+            display: inline-block;
+            width: 20%;
+            padding: 6px 12px;
+            margin: 8px 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type=submit] {
+            width: 30%;
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        input[type=submit]:hover {
+            background-color: #45a049;
+        }
+
+        .filter-background {
+            border-radius: 5px;
+            background-color: #f2f2f2;
+            padding: 20px;
+            user-select: none;
+        }
+
+    </style>
+
+    <script src="https://unpkg.com/timeago.js@4.0.2/dist/timeago.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+</head>
+<body>
+<h1 class="disable-select header">Violation Records</h1>
+
+<div class="filter-background">
+    <h3>Filters</h3>
+    <form id="filterForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name"><br><br>
+        <label for="location">Location:</label>
+        <input type="text" id="location" name="location"><br><br>
+        <label for="timestampFirst">Records After:</label>
+        <input type="date" id="timestampFirst" name="timestampFirst">
+        <label for="timestampLast">Records Before: </label>
+        <input type="date" id="timestampLast" name="timestampLast"><br><br>
+
+        <input type="submit" value="Filter">
+    </form>
+</div>
+
+<h3 class="disable-select">Records</h3>
+<table style="width:100%" id="recordsTable">
+    <thead>
+    <tr>
+        <th>Timestamp</th>
+        <th>Name</th>
+        <th>Location</th>
+    </tr>
+    </thead>
+
+    <tbody id="tbody"></tbody>
+</table>
+
+<script src="/records.js"></script>
+
+</body>
+</html>

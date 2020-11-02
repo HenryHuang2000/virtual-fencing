@@ -55,7 +55,7 @@ public class Controller {
      * @return A copy of the record saved in the database.
      */
     @PostMapping("/records")
-    public ViolationRecord addVersionRecord(ViolationRecordRequest violationRecordRequest) {
+    public ViolationRecord addVersionRecord(@RequestBody ViolationRecordRequest violationRecordRequest) {
 
         return violationDao.addViolationRecord(violationRecordRequest);
     }
