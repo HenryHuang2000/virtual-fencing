@@ -36,25 +36,14 @@ function setupColumnSorting() {
 
 function applyFilters(filters) {
     let queries = [];
-    if (filters.commitHash.value.length > 0) {
-        queries.push("commitHash=" + filters.commitHash.value);
+    if (filters.name.value.length > 0) {
+        queries.push("name=" + filters.name.value);
     }
-    if (filters.majorVersion.value.length > 0) {
-        queries.push("majorVersion=" + filters.majorVersion.value);
+    if (filters.id.value.length > 0) {
+        queries.push("id=" + filters.id.value);
     }
-    if (filters.minorVersion.value.length > 0) {
-        queries.push("minorVersion=" + filters.minorVersion.value);
-    }
-    if (filters.patchVersion.value.length > 0) {
-        queries.push("patchVersion=" + filters.patchVersion.value);
-    }
-    if (filters.dirty.value.length > 0) {
-        const dirtyVal = filters.dirty.value;
-        if (dirtyVal == "dirty") {
-            queries.push("dirty=" + "true");
-        } else {
-            queries.push("dirty=" + "false");
-        }
+    if (filters.location.value.length > 0) {
+        queries.push("location=" + filters.location.value);
     }
     if (filters.timestampFirst.value.length > 0) {
         const date = new Date(filters.timestampFirst.value);
@@ -64,19 +53,11 @@ function applyFilters(filters) {
         const date = new Date(filters.timestampLast.value);
         queries.push("timestampLast=" + date.getTime());
     }
-    console.log(filters.commitHash.value);
-    console.log(filters.majorVersion.value);
-    console.log(filters.minorVersion.value);
-    console.log(filters.patchVersion.value);
-    console.log(filters.dirty.value);
-    console.log(filters.timestampLast.value);
-    console.log(filters.timestampFirst.value);
 
     let url = "/api/records";
     if (queries.length > 0) {
         url += "?" + queries.join('&');
     }
-    console.log(url);
     displayHttpGet(url);
 }
 
@@ -92,70 +73,27 @@ function displayHttpGet(url) {
         .then(response => response.json())
         .then(records => {
             for (const record of records) {
-                // Combine the versions together.
-                const version = `${record.majorVersion}.${record.minorVersion}.${record.patchVersion}`;
 
                 row = newBody.insertRow();
 
-                // Version cell.
-                row.insertCell(0).appendChild(document.createTextNode(version));
-                // Assumes major and minor are 1 byte each and patch is 2 bytes (same assumption made in ble_iot).
-                // Value is composed using bit shifts to allow sorting values lexicographically.
-                row.children[0].dataset.value = record.majorVersion << 24 | record.minorVersion << 16 | record.patchVersion;
+                // Name cell.
+                row.insertCell(0).appendChild(document.createTextNode(record.name));
+                row.children[0].dataset.value = record.name;
 
-                // Commit hash cell.
-                row.insertCell(1).appendChild(document.createTextNode(record.commitHash));
-                row.children[1].appendChild(renderDirtyIconWithTooltip(record.dirty));
-                row.children[1].dataset.value = record.commitHash;
+                // Id cell.
+                row.insertCell(1).appendChild(document.createTextNode(record.id));
+                row.children[1].dataset.value = record.id;
+
+                // Location cell.
+                row.insertCell(2).appendChild(document.createTextNode(record.location));
+                row.children[2].dataset.value = record.location;
 
                 // Timestamp cell.
-                row.insertCell(2).appendChild(renderTimestampWithTooltip(record.timestamp));
-                row.children[2].dataset.value = Date.parse(record.timestamp);
+                row.insertCell(3).appendChild(document.createTextNode(record.timestamp));
+                row.children[3].dataset.value = Date.parse(record.timestamp);
             }
 
         });
 
     table.replaceChild(newBody, oldBody);
-}
-
-function renderDirtyIconWithTooltip(isDirty) {
-
-    const iconType = isDirty ? "dirty-icon" : "clean-icon";
-    const icon = isDirty ? "warning" : "check_circle";
-    const tooltipText = isDirty ? "Dirty" : "Clean";
-
-    const dirtyIconContainer = document.createElement('i');
-    dirtyIconContainer.className = "material-icons " + iconType;
-    dirtyIconContainer.appendChild(document.createTextNode(icon));
-
-    const tooltipTextContainer = document.createElement("span");
-    tooltipTextContainer.className = "tooltipText";
-    tooltipTextContainer.appendChild(document.createTextNode(tooltipText));
-
-    const div = document.createElement('div');
-    div.className = "tooltip";
-    div.style.float = "right";
-    div.appendChild(dirtyIconContainer);
-    div.appendChild(tooltipTextContainer);
-
-    return div;
-}
-
-// Given string formatted with ISO-8601.
-function renderTimestampWithTooltip(timestamp) {
-
-    const date = new Date(timestamp);
-    // Uses day-month-year order and 24-hour time without AM/PM.
-    const formattedDate = date.toLocaleString();
-
-    const tooltipTextContainer = document.createElement("span");
-    tooltipTextContainer.className = "tooltipText";
-    tooltipTextContainer.appendChild(document.createTextNode(formattedDate));
-
-    const div = document.createElement('div');
-    div.className = "tooltip";
-    div.appendChild(document.createTextNode(timeago.format(timestamp)));
-    div.appendChild(tooltipTextContainer);
-
-    return div;
 }
