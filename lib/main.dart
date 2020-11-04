@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
+
+
 void main() {
   runApp(MyApp());
+
+  // generate a random id
+  var uuid = Uuid();
+  uuid.v4();
 }
 
 class MyApp extends StatelessWidget {
@@ -92,13 +98,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   labelText: 'Enter your name'
               ),
             ),
-            // TODO: Change this to automatically generated UUID
-            TextFormField(
-              decoration: InputDecoration(
-                  labelText: 'UUID'
-              ),
-            )
+
           ],
+
         ),
       ),
       // button here??
@@ -120,4 +122,40 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Text('Submit'),
     );
   }
+}
+
+////////////////////////////////////////////
+
+// Define a custom Form widget.
+class MyCustomForm extends StatefulWidget {
+  @override
+  MyCustomFormState createState() {
+    return MyCustomFormState();
+  }
+}
+
+// Define a corresponding State class.
+// This class holds data related to the form.
+class MyCustomFormState extends State<MyCustomForm> {
+  // Create a global key that uniquely identifies the Form widget
+  // and allows validation of the form.
+  //
+  // Note: This is a `GlobalKey<FormState>`,
+  // not a GlobalKey<MyCustomFormState>.
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
+    // Build a Form widget using the _formKey created above.
+    return Form(
+        key: _formKey,
+        child: Column(
+            children: <Widget>[
+              // Add TextFormFields and ElevatedButton here.
+            ]
+        )
+
+    );
+  }
+
 }
