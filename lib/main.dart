@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 
 void main() {
@@ -42,22 +43,41 @@ class MyCustomFormState extends State<MyCustomForm> {
 
   @override
   Widget build(BuildContext context) {
-    // Build a Form widget using the _formKey created above.
     return Form(
       key: _formKey,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
+          // name input
           TextFormField(
             decoration: InputDecoration(labelText: 'Enter your name'),
             validator: (value) {
               if (value.isEmpty) {
-                return 'Please enter your name';
+                return 'Name must not be blank';
               }
-
               return null;
             },
           ),
+
+          // number input
+          TextFormField(
+            decoration: InputDecoration(labelText: 'Enter your mobile number'),
+            keyboardType: TextInputType.number,
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly
+            ],
+            validator: (value) {
+              if (value.isEmpty) {
+                return 'Mobile number must not be blank';
+              } else if (value.length != 10) {
+                return 'Mobile number must be 10 digits long';
+              } else if (!value.startsWith('04') && !value.startsWith('05')) {
+                return 'Mobile number must start with 04 or 05';
+              }
+              return null;
+            },
+          ),
+
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: ElevatedButton(
