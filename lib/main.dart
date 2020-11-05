@@ -49,13 +49,12 @@ class MyCustomFormState extends State<MyCustomForm> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           TextFormField(
-            decoration: InputDecoration(
-                labelText: 'Enter your name'
-            ),
+            decoration: InputDecoration(labelText: 'Enter your name'),
             validator: (value) {
               if (value.isEmpty) {
                 return 'Please enter your name';
               }
+
               return null;
             },
           ),
@@ -65,9 +64,22 @@ class MyCustomFormState extends State<MyCustomForm> {
               onPressed: () {
                 // Validate returns true if the form is valid, or false otherwise.
                 if (_formKey.currentState.validate()) {
+                  // if form is valid, generate a uuid
+                  var uuid = Uuid();
+                  var id = uuid.v4().toString();
+
                   // If the form is valid, display a Snackbar.
-                  Scaffold.of(context)
-                      .showSnackBar(SnackBar(content: Text('Processing Data')));
+/*                  Scaffold.of(context)
+                      .showSnackBar(SnackBar(content: Text('Processing Data')));*/
+
+                  // display uuid generated
+                  return showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                            title: Text('New uuid'),
+                            content: Text('Your uuid is: $id'));
+                      });
                 }
               },
               child: Text('Submit'),
