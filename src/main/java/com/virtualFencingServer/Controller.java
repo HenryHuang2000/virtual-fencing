@@ -36,6 +36,7 @@ public class Controller {
             @RequestParam("name") Optional<String> name,
             @RequestParam("userId") Optional<String> userId,
             @RequestParam("location") Optional<String> location,
+            @RequestParam("resolved") Optional<Boolean> resolved,
             @RequestParam("timestampFirst") Optional<Long> timestampFirst,
             @RequestParam("timestampLast") Optional<Long> timestampLast
     ) {
@@ -43,6 +44,7 @@ public class Controller {
                 name,
                 userId,
                 location,
+                resolved,
                 timestampFirst,
                 timestampLast
         );

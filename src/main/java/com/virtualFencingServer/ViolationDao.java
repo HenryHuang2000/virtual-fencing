@@ -67,6 +67,10 @@ public class ViolationDao {
             queryArgs.add("location = :location");
             queryArgMatcher.put("location", val);
         });
+        queryParameters.getResolved().ifPresent(val -> {
+            queryArgs.add("resolved = :resolved");
+            queryArgMatcher.put("resolved", val);
+        });
         queryParameters.getTimestampFirst().ifPresent(val -> {
             queryArgs.add("timestamp > :firstTime");
             queryArgMatcher.put("firstTime", Timestamp.from(Instant.ofEpochSecond(val)));
@@ -92,12 +96,14 @@ public class ViolationDao {
 
         GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
         namedJdbc.update(
-                "INSERT INTO violation_records (timestamp, name, user_id, location) VALUES (:timestamp,:name,:userId,:location)",
+                "INSERT INTO violation_records (timestamp, name, user_id, location, resolved)" +
+                        " VALUES (:timestamp,:name,:userId,:location,:resolved)",
                 new MapSqlParameterSource()
                         .addValue("timestamp", Timestamp.from(Instant.now(clock)))
                         .addValue("name", violationRecordRequest.getName())
                         .addValue("userId", violationRecordRequest.getUserId())
-                        .addValue("location", violationRecordRequest.getLocation()),
+                        .addValue("location", violationRecordRequest.getLocation())
+                        .addValue("resolved", false),
                 generatedKeyHolder,
                 new String[]{"id"}
         );
@@ -126,7 +132,8 @@ public class ViolationDao {
                     resultSet.getTimestamp("timestamp").toInstant(),
                     resultSet.getString("name"),
                     resultSet.getString("user_id"),
-                    resultSet.getString("location")
+                    resultSet.getString("location"),
+                    resultSet.getBoolean("resolved")
             );
         }
     }

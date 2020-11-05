@@ -3,5 +3,6 @@ CREATE TABLE IF NOT EXISTS violation_records(
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     name VARCHAR NOT NULL,
     user_id VARCHAR NOT NULL,
-    location VARCHAR NOT NULL
+    location VARCHAR NOT NULL,
+    resolved BOOLEAN NOT NULL
 );

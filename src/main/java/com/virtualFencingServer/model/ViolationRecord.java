@@ -18,18 +18,21 @@ public class ViolationRecord {
     private final String name;
     private final String userId;
     private final String location;
+    private final Boolean resolved;
 
     @JsonCreator
     public ViolationRecord(
             @JsonProperty("timestamp") Instant timestamp,
             @JsonProperty("name") String name,
             @JsonProperty("userId") String userId,
-            @JsonProperty("location") String location
+            @JsonProperty("location") String location,
+            @JsonProperty("resolved") Boolean resolved
     ) {
         this.timestamp = requireNonNull(timestamp);
         this.name = requireNonNull(name);
         this.userId = requireNonNull(userId);
         this.location = requireNonNull(location);
+        this.resolved = requireNonNull(resolved);
     }
 
     @JsonProperty("timestamp")
@@ -44,6 +47,9 @@ public class ViolationRecord {
     @JsonProperty("location")
     public String getLocation() { return location; }
 
+    @JsonProperty("resolved")
+    public Boolean getResolved() { return resolved; }
+
 
     @Override
     public String toString() {
@@ -52,6 +58,7 @@ public class ViolationRecord {
                 "name=" + name +
                 "userId=" + userId +
                 "location=" + location +
+                "resolved=" + resolved +
                 '}';
     }
 
@@ -63,11 +70,12 @@ public class ViolationRecord {
         return timestamp.equals(that.timestamp) &&
                 name.equals(that.name) &&
                 userId.equals(that.userId) &&
-                location.equals(that.location);
+                location.equals(that.location) &&
+                resolved.equals(that.resolved);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(timestamp, name, userId, location);
+        return Objects.hash(timestamp, name, userId, location, resolved);
     }
 }

@@ -10,6 +10,7 @@ public class ViolationRecordQueryParameters {
     private final Optional<String> name;
     private final Optional<String> userId;
     private final Optional<String> location;
+    private final Optional<Boolean> resolved;
     private final Optional<Long> timestampFirst;
     private final Optional<Long> timestampLast;
 
@@ -17,12 +18,14 @@ public class ViolationRecordQueryParameters {
             Optional<String> name,
             Optional<String> userId,
             Optional<String> location,
+            Optional<Boolean> resolved,
             Optional<Long> timestampFirst,
             Optional<Long> timestampLast
     ) {
         this.name = name;
         this.userId = userId;
         this.location = location;
+        this.resolved = resolved;
         this.timestampFirst = timestampFirst;
         this.timestampLast = timestampLast;
     }
@@ -32,6 +35,8 @@ public class ViolationRecordQueryParameters {
     public Optional<String> getUserId() { return userId; }
 
     public Optional<String> getLocation() { return location; }
+
+    public Optional<Boolean> getResolved() { return resolved; }
 
     public Optional<Long> getTimestampFirst() {
         return timestampFirst;
@@ -49,6 +54,7 @@ public class ViolationRecordQueryParameters {
                 ", name=" + name +
                 ", userId=" + userId +
                 ", location=" + location +
+                ", resolved=" + resolved +
                 '}';
     }
 }

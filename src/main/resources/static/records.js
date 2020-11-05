@@ -88,9 +88,13 @@ function displayHttpGet(url) {
                 row.insertCell(2).appendChild(document.createTextNode(record.location));
                 row.children[2].dataset.value = record.location;
 
+                // Resolved cell.
+                row.insertCell(3).appendChild(document.createTextNode(record.resolved));
+                row.children[3].dataset.value = record.resolved;
+
                 // Timestamp cell.
-                row.insertCell(3).appendChild(document.createTextNode(record.timestamp));
-                row.children[3].dataset.value = Date.parse(record.timestamp);
+                row.insertCell(4).appendChild(document.createTextNode(record.timestamp));
+                row.children[4].dataset.value = Date.parse(record.timestamp);
             }
 
         });
