@@ -8,20 +8,20 @@ import java.util.Optional;
  */
 public class ViolationRecordQueryParameters {
     private final Optional<String> name;
-    private final Optional<String> id;
+    private final Optional<String> userId;
     private final Optional<String> location;
     private final Optional<Long> timestampFirst;
     private final Optional<Long> timestampLast;
 
     public ViolationRecordQueryParameters(
             Optional<String> name,
-            Optional<String> id,
+            Optional<String> userId,
             Optional<String> location,
             Optional<Long> timestampFirst,
             Optional<Long> timestampLast
     ) {
         this.name = name;
-        this.id = id;
+        this.userId = userId;
         this.location = location;
         this.timestampFirst = timestampFirst;
         this.timestampLast = timestampLast;
@@ -29,7 +29,7 @@ public class ViolationRecordQueryParameters {
 
     public Optional<String> getName() { return name; }
 
-    public Optional<String> getId() { return id; }
+    public Optional<String> getUserId() { return userId; }
 
     public Optional<String> getLocation() { return location; }
 
@@ -47,7 +47,7 @@ public class ViolationRecordQueryParameters {
                 ", timestampFirst=" + timestampFirst +
                 ", timestampLast=" + timestampLast +
                 ", name=" + name +
-                ", id=" + id +
+                ", userId=" + userId +
                 ", location=" + location +
                 '}';
     }

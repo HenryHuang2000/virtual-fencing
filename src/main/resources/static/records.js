@@ -39,8 +39,8 @@ function applyFilters(filters) {
     if (filters.name.value.length > 0) {
         queries.push("name=" + filters.name.value);
     }
-    if (filters.id.value.length > 0) {
-        queries.push("id=" + filters.id.value);
+    if (filters.userId.value.length > 0) {
+        queries.push("userId=" + filters.userId.value);
     }
     if (filters.location.value.length > 0) {
         queries.push("location=" + filters.location.value);
@@ -81,8 +81,8 @@ function displayHttpGet(url) {
                 row.children[0].dataset.value = record.name;
 
                 // Id cell.
-                row.insertCell(1).appendChild(document.createTextNode(record.id));
-                row.children[1].dataset.value = record.id;
+                row.insertCell(1).appendChild(document.createTextNode(record.userId));
+                row.children[1].dataset.value = record.userId;
 
                 // Location cell.
                 row.insertCell(2).appendChild(document.createTextNode(record.location));

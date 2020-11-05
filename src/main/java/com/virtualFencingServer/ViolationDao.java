@@ -59,9 +59,9 @@ public class ViolationDao {
             queryArgs.add("name = :name");
             queryArgMatcher.put("name", val);
         });
-        queryParameters.getId().ifPresent(val -> {
-            queryArgs.add("id = :id");
-            queryArgMatcher.put("id", val);
+        queryParameters.getUserId().ifPresent(val -> {
+            queryArgs.add("userId = :userId");
+            queryArgMatcher.put("userId", val);
         });
         queryParameters.getLocation().ifPresent(val -> {
             queryArgs.add("location = :location");
@@ -92,10 +92,11 @@ public class ViolationDao {
 
         GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
         namedJdbc.update(
-                "INSERT INTO violation_records (timestamp, name, location) VALUES (:timestamp,:name,:location)",
+                "INSERT INTO violation_records (timestamp, name, user_id, location) VALUES (:timestamp,:name,:userId,:location)",
                 new MapSqlParameterSource()
                         .addValue("timestamp", Timestamp.from(Instant.now(clock)))
                         .addValue("name", violationRecordRequest.getName())
+                        .addValue("userId", violationRecordRequest.getUserId())
                         .addValue("location", violationRecordRequest.getLocation()),
                 generatedKeyHolder,
                 new String[]{"id"}
@@ -124,7 +125,7 @@ public class ViolationDao {
             return new ViolationRecord(
                     resultSet.getTimestamp("timestamp").toInstant(),
                     resultSet.getString("name"),
-                    resultSet.getString("id"),
+                    resultSet.getString("user_id"),
                     resultSet.getString("location")
             );
         }

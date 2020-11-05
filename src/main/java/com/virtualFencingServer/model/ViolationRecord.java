@@ -16,19 +16,19 @@ public class ViolationRecord {
 
     private final Instant timestamp;
     private final String name;
-    private final String id;
+    private final String userId;
     private final String location;
 
     @JsonCreator
     public ViolationRecord(
             @JsonProperty("timestamp") Instant timestamp,
             @JsonProperty("name") String name,
-            @JsonProperty("id") String id,
+            @JsonProperty("userId") String userId,
             @JsonProperty("location") String location
     ) {
         this.timestamp = requireNonNull(timestamp);
         this.name = requireNonNull(name);
-        this.id = requireNonNull(id);
+        this.userId = requireNonNull(userId);
         this.location = requireNonNull(location);
     }
 
@@ -38,8 +38,8 @@ public class ViolationRecord {
     @JsonProperty("name")
     public String getName() { return name; }
 
-    @JsonProperty("id")
-    public String getId() { return id; }
+    @JsonProperty("userId")
+    public String getUserId() { return userId; }
 
     @JsonProperty("location")
     public String getLocation() { return location; }
@@ -50,7 +50,7 @@ public class ViolationRecord {
         return "ViolationRecord {" +
                 "timestamp=" + timestamp +
                 "name=" + name +
-                "id=" + id +
+                "userId=" + userId +
                 "location=" + location +
                 '}';
     }
@@ -62,12 +62,12 @@ public class ViolationRecord {
         ViolationRecord that = (ViolationRecord) o;
         return timestamp.equals(that.timestamp) &&
                 name.equals(that.name) &&
-                id.equals(that.id) &&
+                userId.equals(that.userId) &&
                 location.equals(that.location);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(timestamp, name, id, location);
+        return Objects.hash(timestamp, name, userId, location);
     }
 }

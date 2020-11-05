@@ -17,20 +17,28 @@ import static org.apache.logging.log4j.util.Strings.isBlank;
 public class ViolationRecordRequest {
 
     private final String name;
+    private final String userId;
     private final String location;
 
     @JsonCreator
     public ViolationRecordRequest(
             String name,
+            String userId,
             String location
     ) {
         this.name = name;
+        this.userId = userId;
         this.location = location;
     }
 
     @JsonProperty("name")
     public String getName() {
         return name;
+    }
+
+    @JsonProperty("userId")
+    public String getUserId() {
+        return userId;
     }
 
     @JsonProperty("location")
@@ -42,6 +50,7 @@ public class ViolationRecordRequest {
     public String toString() {
         return "ViolationRecordRequest {" +
                 "name=" + name +
+                "userId=" + userId +
                 "location=" + location +
                 '}';
     }
@@ -52,11 +61,12 @@ public class ViolationRecordRequest {
         if (o == null || getClass() != o.getClass()) return false;
         ViolationRecordRequest that = (ViolationRecordRequest) o;
         return name.equals(that.name) &&
+                userId.equals(that.userId) &&
                 location.equals(that.location);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, location);
+        return Objects.hash(name, userId, location);
     }
 }

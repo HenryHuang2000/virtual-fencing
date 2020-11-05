@@ -25,7 +25,7 @@ public class Controller {
 
     /**
      * @param name: the name of the quarantined individual.
-     * @param id: the id of the quarantined individual.
+     * @param userId: the userId of the quarantined individual.
      * @param location: the location of the quarantined individual.
      * @param timestampFirst the earliest timestamp to return
      * @param timestampLast  the latest timestamp to return
@@ -34,14 +34,14 @@ public class Controller {
     @GetMapping("/records")
     public List<ViolationRecord> getVersionRecords(
             @RequestParam("name") Optional<String> name,
-            @RequestParam("id") Optional<String> id,
+            @RequestParam("userId") Optional<String> userId,
             @RequestParam("location") Optional<String> location,
             @RequestParam("timestampFirst") Optional<Long> timestampFirst,
             @RequestParam("timestampLast") Optional<Long> timestampLast
     ) {
         ViolationRecordQueryParameters queryParameters = new ViolationRecordQueryParameters(
                 name,
-                id,
+                userId,
                 location,
                 timestampFirst,
                 timestampLast
