@@ -5,7 +5,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.virtualFencingServer.model.CheckInRequest;
 import com.virtualFencingServer.model.RegistrationRequest;
 import com.virtualFencingServer.model.UserRecord;
-import com.virtualFencingServer.model.ViolationRecordQueryParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.RowMapper;
@@ -20,10 +19,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 
@@ -48,39 +44,9 @@ public class RecordsDao {
         this.clock = clock;
     }
 
-    /**
-     * Note that the string building arguments must be matched with the respective key in the map.
-     * This was done rather than simple string building to protect against sql injections.
-     */
-    public List<UserRecord> getViolationRecords(ViolationRecordQueryParameters queryParameters) {
+    public List<UserRecord> getViolationRecords() {
 
-        Map<String, Object> queryArgMatcher = new HashMap<>();
-        List<String> queryArgs = new ArrayList<>();
-
-        queryParameters.getName().ifPresent(val -> {
-            queryArgs.add("name = :name");
-            queryArgMatcher.put("name", val);
-        });
-        queryParameters.getId().ifPresent(val -> {
-            queryArgs.add("id = :id");
-            queryArgMatcher.put("id", val);
-        });
-        queryParameters.getLocation().ifPresent(val -> {
-            queryArgs.add("location = :location");
-            queryArgMatcher.put("location", val);
-        });
-        queryParameters.getTimestampFirst().ifPresent(val -> {
-            queryArgs.add("timestamp > :firstTime");
-            queryArgMatcher.put("firstTime", Timestamp.from(Instant.ofEpochSecond(val)));
-        });
-        queryParameters.getTimestampLast().ifPresent(val -> {
-            queryArgs.add("timestamp < :lastTime");
-            queryArgMatcher.put("lastTime", Timestamp.from(Instant.ofEpochSecond(val)));
-        });
-
-        final String filter = queryArgs.isEmpty() ? "" : " WHERE " + String.join(" AND ", queryArgs);
-
-        return namedJdbc.query("SELECT * FROM user_records" + filter, queryArgMatcher, recordRowMapper);
+        return namedJdbc.query("SELECT * FROM user_records", recordRowMapper);
     }
 
     public synchronized UserRecord register(RegistrationRequest registrationRequest) {
