@@ -1,9 +1,11 @@
 package com.virtualFencingServer;
 
 
-import com.virtualFencingServer.model.ViolationRecord;
+import com.virtualFencingServer.model.CheckInRequest;
+import com.virtualFencingServer.model.RegistrationRequest;
+import com.virtualFencingServer.model.UserRecord;
 import com.virtualFencingServer.model.ViolationRecordQueryParameters;
-import com.virtualFencingServer.model.ViolationRecordRequest;
+import org.apache.catalina.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,10 +19,10 @@ import java.util.Optional;
 @RequestMapping("/api")
 public class Controller {
 
-    private final ViolationDao violationDao;
+    private final RecordsDao recordsDao;
 
-    public Controller(ViolationDao violationDao) {
-        this.violationDao = Objects.requireNonNull(violationDao);
+    public Controller(RecordsDao recordsDao) {
+        this.recordsDao = Objects.requireNonNull(recordsDao);
     }
 
     /**
@@ -32,7 +34,7 @@ public class Controller {
      * @return A list of violation records that are filtered by the query parameters.
      */
     @GetMapping("/records")
-    public List<ViolationRecord> getVersionRecords(
+    public List<UserRecord> getVersionRecords(
             @RequestParam("name") Optional<String> name,
             @RequestParam("id") Optional<String> id,
             @RequestParam("location") Optional<String> location,
@@ -46,17 +48,22 @@ public class Controller {
                 timestampFirst,
                 timestampLast
         );
-        return violationDao.getViolationRecords(queryParameters);
+        return recordsDao.getViolationRecords(queryParameters);
+    }
+
+    /**
+     * Registers a verification device.
+     */
+    @PostMapping("/register")
+    public UserRecord register(@RequestBody RegistrationRequest registrationRequest) {
+        return recordsDao.register(registrationRequest);
     }
 
     /**
      * Used to generate a violation record.
-     * @param violationRecordRequest is used to build the violation record.
-     * @return A copy of the record saved in the database.
      */
-    @PostMapping("/records")
-    public ViolationRecord addVersionRecord(@RequestBody ViolationRecordRequest violationRecordRequest) {
-
-        return violationDao.addViolationRecord(violationRecordRequest);
+    @PostMapping("/check-in")
+    public UserRecord checkIn(@RequestBody CheckInRequest checkInRequest) {
+        return recordsDao.checkIn(checkInRequest);
     }
 }

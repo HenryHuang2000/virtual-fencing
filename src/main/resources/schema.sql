@@ -1,6 +1,9 @@
-CREATE TABLE IF NOT EXISTS violation_records(
+CREATE TABLE IF NOT EXISTS user_records(
     id BIGSERIAL PRIMARY KEY,
-    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
-    name VARCHAR NOT NULL,
-    location VARCHAR NOT NULL
+    last_check_in TIMESTAMP WITH TIME ZONE NOT NULL,
+    number VARCHAR NOT NULL UNIQUE,
+    password VARCHAR NOT NULL,
+    bssid VARCHAR NOT NULL,
+    vd_mac VARCHAR NOT NULL,
+    device_mac VARCHAR
 );
