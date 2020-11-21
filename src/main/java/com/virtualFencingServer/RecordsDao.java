@@ -53,14 +53,15 @@ public class RecordsDao {
 
         Instant timestamp = Instant.now(clock);
         namedJdbc.update(
-                "INSERT INTO user_records (last_check_in, number, password, bssid, vd_mac) VALUES " +
-                        "(:timestamp, :number, :password, :bssid, :vd_mac)",
+                "INSERT INTO user_records (last_check_in, number, password, bssid, vd_mac, url) VALUES " +
+                        "(:timestamp, :number, :password, :bssid, :vd_mac, :url)",
                 new MapSqlParameterSource()
                         .addValue("timestamp", Timestamp.from(timestamp))
                         .addValue("number", registrationRequest.getPhoneNumber())
                         .addValue("password", registrationRequest.getPassword())
                         .addValue("bssid", registrationRequest.getBssid())
                         .addValue("vd_mac", registrationRequest.getMacAddress())
+                        .addValue("url", registrationRequest.getUrl())
         );
 
         return getRecordFromNumber(registrationRequest.getPhoneNumber());
@@ -91,8 +92,11 @@ public class RecordsDao {
                             .addValue("macAddress", checkInRequest.getMacAddress())
                             .addValue("number", phoneNumber)
             );
-        } else if (!checkInRequest.getMacAddress().equals(userRecord.getDeviceMac())) {
-            // Password or BSSID incorrect.
+        } else if (
+                !checkInRequest.getMacAddress().equals(userRecord.getDeviceMac()) &&
+                !checkInRequest.getMacAddress().equals(userRecord.getVdMac())
+        ) {
+            // BSSID incorrect.
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "The MAC address is incorrect"
@@ -106,7 +110,18 @@ public class RecordsDao {
                         .addValue("number", phoneNumber)
         );
 
+        changePendingViolation(false, phoneNumber);
+
         return getRecordFromNumber(phoneNumber);
+    }
+
+    public synchronized void changePendingViolation(boolean isPending, String phoneNumber) {
+        namedJdbc.update(
+            "UPDATE user_records SET pending_violation = :isPending WHERE number = :number",
+                new MapSqlParameterSource()
+                        .addValue("isPending", isPending)
+                        .addValue("number", phoneNumber)
+        );
     }
 
     private UserRecord getRecordFromNumber(String phoneNumber) {
@@ -128,7 +143,9 @@ public class RecordsDao {
                     resultSet.getString("number"),
                     resultSet.getString("bssid"),
                     resultSet.getString("vd_mac"),
-                    resultSet.getString("device_mac")
+                    resultSet.getString("device_mac"),
+                    resultSet.getString("url"),
+                    resultSet.getBoolean("pending_violation")
             );
         }
     }

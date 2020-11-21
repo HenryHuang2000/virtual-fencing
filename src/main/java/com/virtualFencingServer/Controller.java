@@ -43,6 +43,17 @@ public class Controller {
      */
     @PostMapping("/check-in")
     public UserRecord checkIn(@RequestBody CheckInRequest checkInRequest) {
+        System.out.println("check in by " + checkInRequest.getPhoneNumber());
         return recordsDao.checkIn(checkInRequest);
+    }
+
+    @GetMapping("/test")
+    public String testGet() {
+        return "GET SUCCESS";
+    }
+
+    @PostMapping("/test")
+    public String testPost() {
+        return "POST SUCCESS";
     }
 }

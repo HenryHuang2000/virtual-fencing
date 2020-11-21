@@ -19,6 +19,8 @@ public class UserRecord {
     private final String bssid;
     private final String vdMac;
     private final String deviceMac;
+    private final String url;
+    private final Boolean pendingViolation;
 
     @JsonCreator
     public UserRecord(
@@ -26,13 +28,17 @@ public class UserRecord {
             @JsonProperty("number") String number,
             @JsonProperty("bssid") String bssid,
             @JsonProperty("vd_mac") String vdMac,
-            @JsonProperty("device_mac") String deviceMac
+            @JsonProperty("device_mac") String deviceMac,
+            @JsonProperty("url") String url,
+            @JsonProperty("pending_violation") Boolean pendingViolation
     ) {
         this.lastCheckIn = requireNonNull(lastCheckIn);
         this.number = requireNonNull(number);
         this.bssid = requireNonNull(bssid);
         this.vdMac = requireNonNull(vdMac);
         this.deviceMac = deviceMac;
+        this.url = url;
+        this.pendingViolation = pendingViolation;
     }
 
     @JsonProperty("last_check_in")
@@ -50,6 +56,12 @@ public class UserRecord {
     @JsonProperty("device_mac")
     public String getDeviceMac() { return deviceMac; }
 
+    @JsonProperty("url")
+    public String getUrl() { return url; }
+
+    @JsonProperty("pending_violation")
+    public Boolean getPendingViolation() { return pendingViolation; }
+
 
     @Override
     public String toString() {
@@ -59,6 +71,8 @@ public class UserRecord {
                 "bssid=" + bssid +
                 "vd_mac=" + vdMac +
                 "device_mac=" + deviceMac +
+                "url=" + url +
+                "pending_violation=" + pendingViolation +
                 '}';
     }
 
@@ -71,11 +85,13 @@ public class UserRecord {
                 number.equals(that.number) &&
                 bssid.equals(that.bssid) &&
                 deviceMac.equals(that.deviceMac) &&
+                pendingViolation.equals(that.pendingViolation) &&
+                url.equals(that.url) &&
                 vdMac.equals(that.vdMac);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(lastCheckIn, number, bssid, vdMac, deviceMac);
+        return Objects.hash(lastCheckIn, number, bssid, vdMac, deviceMac, pendingViolation, url);
     }
 }

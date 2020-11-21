@@ -18,18 +18,21 @@ public class RegistrationRequest {
     private final String password;
     private final String bssid;
     private final String macAddress;
+    private final String url;
 
     @JsonCreator
     public RegistrationRequest(
             String phoneNumber,
             String password,
             String bssid,
-            String macAddress
+            String macAddress,
+            String url
     ) {
         this.phoneNumber = phoneNumber;
         this.password = password;
         this.bssid = bssid;
         this.macAddress = macAddress;
+        this.url = url + "/notify";
     }
 
     @JsonProperty("phoneNumber")
@@ -52,6 +55,11 @@ public class RegistrationRequest {
         return macAddress;
     }
 
+    @JsonProperty("url")
+    public String getUrl() {
+        return url;
+    }
+
     @Override
     public String toString() {
         return "ViolationRecordRequest {" +
@@ -59,6 +67,7 @@ public class RegistrationRequest {
                 "password=" + password +
                 "bssid=" + bssid +
                 "macAddress=" + macAddress +
+                "url=" + url +
                 '}';
     }
 
@@ -70,11 +79,12 @@ public class RegistrationRequest {
         return phoneNumber.equals(that.phoneNumber) &&
                 password.equals(that.password) &&
                 macAddress.equals(that.macAddress) &&
+                url.equals(that.url) &&
                 bssid.equals(that.bssid);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(phoneNumber, bssid, password, macAddress);
+        return Objects.hash(phoneNumber, bssid, password, macAddress, url);
     }
 }
