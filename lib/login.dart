@@ -35,7 +35,7 @@ class LoginState extends State<LoginForm> {
     _getAvailableBiometrics();
     String localPhone = storage.getItem("phone");
     String localPwd = storage.getItem("pwd");
-    if (localPhone.isNotEmpty && localPwd.isNotEmpty) {
+    if (localPhone != null && localPwd != null) {
       phoneController.text = localPhone;
       passwordController.text = localPwd;
     }

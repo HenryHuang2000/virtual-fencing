@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:workmanager/workmanager.dart';
-// import 'package:uuid/uuid.dart';
 
 class HomePage extends StatefulWidget {
   HomePage(
@@ -49,17 +48,22 @@ class _HomePageState extends State<HomePage> {
 
     // default duration = 15min
     Workmanager.registerPeriodicTask("1", "updateNetworkStatus",
-        constraints: Constraints(
-          networkType: NetworkType.connected;
-        ));
+      constraints: Constraints(
+        networkType: NetworkType.connected,
+    ));
+    Workmanager.initialize(
+        callBackDispatcher, // The top level function, aka callbackDispatcher
+        isInDebugMode: true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
+    );
 
-    // timer = Timer.periodic(Duration(minutes: 1),
-    //     (Timer t) => _updatePost(phone, pwd, _bssid, 'b'));
+    timer = Timer.periodic(Duration(minutes: 1),
+        (Timer t) => _updatePost(phone, pwd, _bssid, 'b'));
   }
 
   void callBackDispatcher() {
-    Workmanager.executeTask((taskName, inputData) async => {
-      _updatePost(phone, pwd, _bssid, "b");
+    Workmanager.executeTask((taskName, inputData) {
+      // _updatePost(phone, pwd, _bssid, "b");
+      print("Hello");
       return Future.value(true);
     });
   }
@@ -68,6 +72,7 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     _connectivitySubscription.cancel();
     timer?.cancel();
+    Workmanager.cancelByUniqueName("updateNetworkStatus");
     super.dispose();
   }
 
@@ -129,7 +134,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-          onPressed: () => _updatePost(phone, pwd, "bssid", uuid),
+          onPressed: () => dispose(),
           tooltip: 'Update connection status',
           child: Icon(Icons.refresh)),
     );

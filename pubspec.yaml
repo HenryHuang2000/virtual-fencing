@@ -28,7 +28,7 @@ dependencies:
   permission_handler: ^5.0.1
   localstorage: ^3.0.3+6
   local_auth: ^0.4.0+1
-  uuid: ^2.2.2
+#  uuid: ^2.2.2
   crypto: ^2.1.5
   workmanager: ^0.2.3
 
