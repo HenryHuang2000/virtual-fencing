@@ -1,49 +1,46 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:connectivity/connectivity.dart';
-// import 'package:local_auth/local_auth.dart';
 import 'package:http/http.dart';
-// import 'package:uuid/uuid.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:workmanager/workmanager.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+  HomePage(
+      {Key key,
+      this.title,
+      @required this.phoneNumber,
+      @required this.password})
+      : super(key: key);
 
   final String title;
+  final String phoneNumber;
+  final String password;
 
   @override
-  _HomePageState createState() => _HomePageState();
+  _HomePageState createState() =>
+      _HomePageState(phone: phoneNumber, pwd: password);
 }
 
 class _HomePageState extends State<HomePage> {
+<<<<<<< HEAD
+=======
+  _HomePageState({@required this.phone, @required this.pwd});
+
+  String phone;
+  String pwd;
+  String uuid = "b";
+>>>>>>> 8cffaa494f951eecbc782196750b07f42755b8d2
   String _connectionStatus = 'unknown';
   String _ssid = 'unknown';
   String _bssid = 'unknown';
-  String _macAddr = 'unknown';
+  Timer timer;
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<ConnectivityResult> _connectivitySubscription;
-
-  Future<void> getNetworkData() async {
-    String ssid = await Connectivity().getWifiName();
-    print("SSID: $ssid");
-    setState(() => _ssid = ssid);
-    String bssid = await Connectivity().getWifiBSSID();
-    print("BSSID: $bssid");
-    setState(() => _bssid = bssid);
-  }
 
   @override
   void initState() {
@@ -51,12 +48,34 @@ class _HomePageState extends State<HomePage> {
     initConnectivity();
     _connectivitySubscription =
         _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
-    getNetworkData();
+
+    // default duration = 15min
+    Workmanager.registerPeriodicTask("1", "updateNetworkStatus",
+      constraints: Constraints(
+        networkType: NetworkType.connected,
+    ));
+    Workmanager.initialize(
+        callBackDispatcher, // The top level function, aka callbackDispatcher
+        isInDebugMode: true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
+    );
+
+    timer = Timer.periodic(Duration(minutes: 1),
+        (Timer t) => _updatePost(phone, pwd, _bssid, 'b'));
+  }
+
+  void callBackDispatcher() {
+    Workmanager.executeTask((taskName, inputData) {
+      // _updatePost(phone, pwd, _bssid, "b");
+      print("Hello");
+      return Future.value(true);
+    });
   }
 
   @override
   void dispose() {
     _connectivitySubscription.cancel();
+    timer?.cancel();
+    Workmanager.cancelByUniqueName("updateNetworkStatus");
     super.dispose();
   }
 
@@ -109,14 +128,18 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'ConnectivityType: $_connectionStatus\n'
-              'SSID: $_ssid\n'
-              'BSSID: $_bssid\n'
-            )
+            Text('ConnectivityType: $_connectionStatus\n'
+                'SSID: $_ssid\n'
+                'BSSID: $_bssid\n'
+                'phone: $phone\n'
+                'pwd: $pwd\n')
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+          onPressed: () => dispose(),
+          tooltip: 'Update connection status',
+          child: Icon(Icons.refresh)),
     );
   }
 
@@ -126,25 +149,30 @@ class _HomePageState extends State<HomePage> {
     setState(() async => _bssid = await _connectivity.getWifiBSSID());
   }
 
-  Future<void> _makePostRequest(name, id, location) async {
+  Future<void> _updatePost(phone, password, bssid, macAddress) async {
     // set up POST request arguments
-    String url = 'http://754013b77161.ngrok.io/api/records';
+    String url = "http://be5a5dbe9d99.ngrok.io/api/check-in";
     Map<String, String> headers = {"Content-type": "application/json"};
-    String json = '{"name": "$name", "userId": "$id", "location": "$location"}';
+    Map<String, dynamic> json = new Map();
+    json['phoneNumber'] = phone;
+    json['password'] = pwd;
+    json['bssid'] = _bssid;
+    json['macAddress'] = 'b';
     // make POST request
-    Response response = await post(url, headers: headers, body: json);
+    Response response =
+        await post(url, headers: headers, body: json.toString());
     // check the status code for the result
     int statusCode = response.statusCode;
     print("Post Response Code: " + statusCode.toString());
     // this API passes back the id of the new item added to the body
     String body = response.body;
-    print("Post Response Body: " + statusCode.toString());
+    print("Post Response Body: " + body.toString());
 
     // {
-    //   "email": "user@gmail.com",
+    //   "phone": "0490777777",
     //   "password": "12345",
-    //   "BSSID": some_network,
-    //   "MAC address": 9C-35-5B-5F-4C-D7,
+    //   "bssid": some_network,
+    //   "macAddress": 9C-35-5B-5F-4C-D7,
     // }
   }
 }

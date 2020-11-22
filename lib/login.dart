@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// import 'package:connectivity/connectivity.dart';
 import 'package:local_auth/local_auth.dart';
-// import 'package:http/http.dart';
-import 'package:uuid/uuid.dart';
+import 'package:localstorage/localstorage.dart';
+
+import 'home.dart';
 
 class LoginForm extends StatefulWidget {
   @override
@@ -20,66 +20,72 @@ class LoginForm extends StatefulWidget {
 class LoginState extends State<LoginForm> {
   // Create a global key that uniquely identifies the Form widget and allows validation of the form.
   final _formKey = GlobalKey<FormState>();
+  final phoneController = TextEditingController();
+  final passwordController = TextEditingController();
+  final LocalStorage storage = new LocalStorage('virtual_fencing');
 
   LocalAuthentication auth = LocalAuthentication();
   bool _canCheckBiometric;
   List<BiometricType> _availableBiometric;
-  String authorised = "Not authorised";
+  bool authorised = false;
 
-  Future<void> _checkBiometric() async{
+  @override
+  void initState() {
+    _checkBiometric();
+    _getAvailableBiometrics();
+    String localPhone = storage.getItem("phone");
+    String localPwd = storage.getItem("pwd");
+    if (localPhone != null && localPwd != null) {
+      phoneController.text = localPhone;
+      passwordController.text = localPwd;
+    }
+    super.initState();
+  }
+
+  Future<void> _checkBiometric() async {
     bool canCheckBiometric;
-    try{
+    try {
       canCheckBiometric = await auth.canCheckBiometrics;
-    } on PlatformException catch(e){
+    } on PlatformException catch (e) {
       print(e);
     }
-    if(!mounted) return;
+    if (!mounted) return;
 
     setState(() {
       _canCheckBiometric = canCheckBiometric;
     });
   }
 
-  Future<void> _getAvailableBiometrics() async{
+  Future<void> _getAvailableBiometrics() async {
     List<BiometricType> availableBiometric;
-    try{
+    try {
       availableBiometric = await auth.getAvailableBiometrics();
-    } on PlatformException catch(e){
+    } on PlatformException catch (e) {
       print(e);
     }
-    if(!mounted) return;
+    if (!mounted) return;
 
     setState(() {
       _availableBiometric = availableBiometric;
     });
   }
 
-  Future<void> _authenticate() async{
+  Future<void> _authenticate() async {
     bool authenticated = false;
-    try{
+    try {
       authenticated = await auth.authenticateWithBiometrics(
           localizedReason: "Scan your finger print to authenticate",
           useErrorDialogs: true,
-          stickyAuth: false
-      );
-    } on PlatformException catch(e){
+          stickyAuth: false);
+    } on PlatformException catch (e) {
       print(e);
     }
-    if(!mounted) return;
+    if (!mounted) return;
 
-    setState(() {
-      authorised = authenticated ? "Authorised success" : "Failed to authenticate";
-    });
-    if (authenticated) {
-      Navigator.pushNamed(context, '/home');
-    }
-  }
-
-  @override
-  void initState() {
-    _checkBiometric();
-    _getAvailableBiometrics();
-    super.initState();
+    setState(() => authorised = authenticated);
+    // if (authenticated) {
+    //   Navigator.pushNamed(context, '/home');
+    // }
   }
 
   @override
@@ -99,26 +105,6 @@ class LoginState extends State<LoginForm> {
               ),
             ),
           ),
-
-          Container(
-            // name input
-            width: 300.0,
-            margin: new EdgeInsets.symmetric(vertical: 10.0, horizontal: 50.0),
-            child: TextFormField(
-              decoration: InputDecoration(
-                labelText: 'Enter your name',
-                contentPadding: new EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(35.0)),
-              ),
-              validator: (value) {
-                if (value.isEmpty) {
-                  return 'Name must not be blank';
-                }
-                return null;
-              },
-            ),
-          ),
-
           Container(
             // password input
             width: 300.0,
@@ -126,8 +112,10 @@ class LoginState extends State<LoginForm> {
             child: TextFormField(
               decoration: InputDecoration(
                 labelText: 'Enter your mobile number',
-                contentPadding: new EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(35.0)),
+                contentPadding:
+                    new EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(35.0)),
               ),
               keyboardType: TextInputType.number,
               inputFormatters: <TextInputFormatter>[
@@ -143,9 +131,30 @@ class LoginState extends State<LoginForm> {
                 }
                 return null;
               },
+              controller: phoneController,
             ),
           ),
-
+          Container(
+            // name input
+            width: 300.0,
+            margin: new EdgeInsets.symmetric(vertical: 10.0, horizontal: 50.0),
+            child: TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Enter your password',
+                contentPadding:
+                    new EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(35.0)),
+              ),
+              validator: (value) {
+                if (value.isEmpty) {
+                  return 'Name must not be blank';
+                }
+                return null;
+              },
+              controller: passwordController,
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 18.0),
             child: RaisedButton(
@@ -157,7 +166,17 @@ class LoginState extends State<LoginForm> {
               onPressed: () {
                 // Validate returns true if the form is valid, or false otherwise.
                 if (_formKey.currentState.validate()) {
-                  _authenticate();
+                  // var phoneBytes = utf8.encode(phoneController.text);
+                  // var pwdBytes = utf8.encode(passwordController.text);
+                  storage.setItem("phone", phoneController.text);
+                  storage.setItem("pwd", passwordController.text);
+                  // _authenticate();
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => HomePage(
+                              phoneNumber: phoneController.text,
+                              password: passwordController.text)));
                   // if form is valid, generate a uuid
                   // var uuid = Uuid();
                   // var id = uuid.v4().toString();
