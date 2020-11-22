@@ -29,7 +29,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // WifiInfoWrapper _wifiObject;
   String _connectionStatus = 'unknown';
   String _ssid = 'unknown';
   String _bssid = 'unknown';
