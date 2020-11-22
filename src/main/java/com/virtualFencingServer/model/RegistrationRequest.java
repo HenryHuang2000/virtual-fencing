@@ -14,35 +14,19 @@ import static java.util.Objects.requireNonNull;
  */
 public class RegistrationRequest {
 
-    private final String phoneNumber;
-    private final String password;
     private final String bssid;
     private final String macAddress;
     private final String url;
 
     @JsonCreator
     public RegistrationRequest(
-            String phoneNumber,
-            String password,
             String bssid,
             String macAddress,
             String url
     ) {
-        this.phoneNumber = phoneNumber;
-        this.password = password;
         this.bssid = bssid;
         this.macAddress = macAddress;
         this.url = url + "/notify";
-    }
-
-    @JsonProperty("phoneNumber")
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    @JsonProperty("password")
-    public String getPassword() {
-        return password;
     }
 
     @JsonProperty("bssid")
@@ -63,8 +47,6 @@ public class RegistrationRequest {
     @Override
     public String toString() {
         return "ViolationRecordRequest {" +
-                "phoneNumber=" + phoneNumber +
-                "password=" + password +
                 "bssid=" + bssid +
                 "macAddress=" + macAddress +
                 "url=" + url +
@@ -76,15 +58,13 @@ public class RegistrationRequest {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RegistrationRequest that = (RegistrationRequest) o;
-        return phoneNumber.equals(that.phoneNumber) &&
-                password.equals(that.password) &&
-                macAddress.equals(that.macAddress) &&
+        return macAddress.equals(that.macAddress) &&
                 url.equals(that.url) &&
                 bssid.equals(that.bssid);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(phoneNumber, bssid, password, macAddress, url);
+        return Objects.hash(bssid, macAddress, url);
     }
 }

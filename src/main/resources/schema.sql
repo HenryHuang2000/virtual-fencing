@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS user_records(
     id BIGSERIAL PRIMARY KEY,
     last_check_in TIMESTAMP WITH TIME ZONE NOT NULL,
-    number VARCHAR NOT NULL UNIQUE,
-    password VARCHAR NOT NULL,
+    first_check_in TIMESTAMP WITH TIME ZONE NOT NULL,
+    number VARCHAR UNIQUE,
     bssid VARCHAR NOT NULL,
     vd_mac VARCHAR NOT NULL,
     device_mac VARCHAR,

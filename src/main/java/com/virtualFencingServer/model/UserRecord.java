@@ -33,11 +33,11 @@ public class UserRecord {
             @JsonProperty("pending_violation") Boolean pendingViolation
     ) {
         this.lastCheckIn = requireNonNull(lastCheckIn);
-        this.number = requireNonNull(number);
+        this.number = number;
         this.bssid = requireNonNull(bssid);
         this.vdMac = requireNonNull(vdMac);
         this.deviceMac = deviceMac;
-        this.url = url;
+        this.url = requireNonNull(url);
         this.pendingViolation = pendingViolation;
     }
 

@@ -53,18 +53,16 @@ public class RecordsDao {
 
         Instant timestamp = Instant.now(clock);
         namedJdbc.update(
-                "INSERT INTO user_records (last_check_in, number, password, bssid, vd_mac, url) VALUES " +
-                        "(:timestamp, :number, :password, :bssid, :vd_mac, :url)",
+                "INSERT INTO user_records (last_check_in, first_check_in, bssid, vd_mac, url) VALUES " +
+                        "(:timestamp, :timestamp, :bssid, :vd_mac, :url)",
                 new MapSqlParameterSource()
                         .addValue("timestamp", Timestamp.from(timestamp))
-                        .addValue("number", registrationRequest.getPhoneNumber())
-                        .addValue("password", registrationRequest.getPassword())
                         .addValue("bssid", registrationRequest.getBssid())
                         .addValue("vd_mac", registrationRequest.getMacAddress())
                         .addValue("url", registrationRequest.getUrl())
         );
 
-        return getRecordFromNumber(registrationRequest.getPhoneNumber());
+        return getRecordFromBssid(registrationRequest.getBssid());
 
     }
 
@@ -75,28 +73,29 @@ public class RecordsDao {
 
         String phoneNumber = checkInRequest.getPhoneNumber();
         // Verify BSSID.
-        UserRecord userRecord = getRecordFromNumber(phoneNumber);
+        UserRecord userRecord = getRecordFromBssid(checkInRequest.getBssid());
         if (!userRecord.getBssid().equals(checkInRequest.getBssid())) {
-            // Password or BSSID incorrect.
+            //BSSID incorrect.
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "The BSSID is incorrect"
             );
         }
 
-        // Check if MAC Address exists. If it does not exist, set it.
+        // Check if MAC Address exists. If it does not exist, set the MAC and number.
         if (userRecord.getDeviceMac() == null) {
             namedJdbc.update(
-                    "UPDATE user_records SET device_mac = :macAddress WHERE number = :number",
+                    "UPDATE user_records SET (device_mac, number) = (:macAddress, :number) WHERE bssid = :bssid",
                     new MapSqlParameterSource()
                             .addValue("macAddress", checkInRequest.getMacAddress())
-                            .addValue("number", phoneNumber)
+                            .addValue("number", checkInRequest.getPhoneNumber())
+                            .addValue("bssid", checkInRequest.getBssid())
             );
         } else if (
                 !checkInRequest.getMacAddress().equals(userRecord.getDeviceMac()) &&
                 !checkInRequest.getMacAddress().equals(userRecord.getVdMac())
         ) {
-            // BSSID incorrect.
+            // MAC address incorrect.
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "The MAC address is incorrect"
@@ -112,7 +111,7 @@ public class RecordsDao {
 
         changePendingViolation(false, phoneNumber);
 
-        return getRecordFromNumber(phoneNumber);
+        return getRecordFromBssid(checkInRequest.getBssid());
     }
 
     public synchronized void changePendingViolation(boolean isPending, String phoneNumber) {
@@ -124,10 +123,10 @@ public class RecordsDao {
         );
     }
 
-    private UserRecord getRecordFromNumber(String phoneNumber) {
+    private UserRecord getRecordFromBssid(String bssid) {
         return namedJdbc.queryForObject(
-                "SELECT * FROM user_records WHERE number = :number",
-                new MapSqlParameterSource().addValue("number", phoneNumber),
+                "SELECT * FROM user_records WHERE bssid = :bssid",
+                new MapSqlParameterSource().addValue("bssid", bssid),
                 recordRowMapper);
     }
 

@@ -50,7 +50,7 @@ public class ViolationScheduler {
     }
 
     private void triggerVerificationDevice(String url) {
-        restTemplate.postForEntity(url, "test", String.class);
+//        restTemplate.postForEntity(url, "test", String.class);
     }
 
 }
