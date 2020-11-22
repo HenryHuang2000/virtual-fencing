@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,7 +9,8 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:wifi_info_flutter/wifi_info_flutter.dart';
-import 'package:workmanager/workmanager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:workmanager/workmanager.dart';
 
 class HomePage extends StatefulWidget {
   HomePage(
@@ -32,14 +34,14 @@ class _HomePageState extends State<HomePage> {
 
   String phone;
   String pwd;
-  String uuid = "b";
+  String _uuid = 'none';
   String _connectionStatus = 'unknown';
-  String _ssid = 'unknown';
   String _bssid = 'unknown';
   Timer timer;
   final Connectivity _connectivity = Connectivity();
   final WifiInfo _wifiInfo = WifiInfo();
   StreamSubscription<ConnectivityResult> _connectivitySubscription;
+  final String url = "http://1a4d5746aaf3.ngrok.io/api/check-in";
 
   @override
   void initState() {
@@ -47,34 +49,59 @@ class _HomePageState extends State<HomePage> {
     initConnectivity();
     _connectivitySubscription =
         _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+    if (_uuid == 'none') {
+      _registerDevice();
+    }
 
     // default duration = 15min
-    Workmanager.registerPeriodicTask("1", "updateNetworkStatus",
-      constraints: Constraints(
-        networkType: NetworkType.connected,
-    ));
-    Workmanager.initialize(
-        callBackDispatcher, // The top level function, aka callbackDispatcher
-        isInDebugMode: true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
-    );
+    // Workmanager.registerPeriodicTask("1", "updateNetworkStatus",
+    //   constraints: Constraints(
+    //     networkType: NetworkType.connected,
+    // ));
+    // Workmanager.initialize(
+    //     callBackDispatcher, // The top level function, aka callbackDispatcher
+    //     isInDebugMode: true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
+    // );
 
     timer = Timer.periodic(Duration(minutes: 1),
-        (Timer t) => _updatePost(phone, pwd, _bssid, 'b'));
+        (Timer t) => _updatePost(phone, pwd, _bssid, _uuid));
   }
 
-  void callBackDispatcher() {
-    Workmanager.executeTask((taskName, inputData) {
-      // _updatePost(phone, pwd, _bssid, "b");
-      print("Hello");
-      return Future.value(true);
-    });
+  Future<String> postData(url, data) async {
+    Map<String, String> headers = {"Content-type": "application/json"};
+    Response response =
+    await post(url, headers: headers, body: data.toString());
+    // check the status code for the result
+    int statusCode = response.statusCode;
+    print("Post Response Code: " + statusCode.toString());
+    // this API passes back the id of the new item added to the body
+    String body = response.body;
+    print("Post Response Body: " + body.toString());
+    return body;
   }
+
+  _registerDevice () async {
+    Map<String, dynamic> sendPkt = new Map();
+    sendPkt['phone'] = phone;
+    sendPkt['bssid'] = _bssid;
+    String res = await postData(url, sendPkt);
+    Map data = json.decode(res);
+    setState(() => _uuid = data['device_mac']);
+  }
+
+  // void callBackDispatcher() {
+  //   Workmanager.executeTask((taskName, inputData) {
+  //     // _updatePost(phone, pwd, _bssid, "b");
+  //     print("Hello");
+  //     return Future.value(true);
+  //   });
+  // }
 
   @override
   void dispose() {
     _connectivitySubscription.cancel();
     timer?.cancel();
-    Workmanager.cancelByUniqueName("updateNetworkStatus");
+    // Workmanager.cancelByUniqueName("updateNetworkStatus");
     super.dispose();
   }
 
@@ -82,16 +109,12 @@ class _HomePageState extends State<HomePage> {
     setState(() => _connectionStatus = result.toString());
     switch (result) {
       case ConnectivityResult.wifi:
-        String wifiName, wifiBSSID, wifiIP;
-        wifiName = await _wifiInfo.getWifiName();
-        wifiBSSID = await _wifiInfo.getWifiBSSID();
+        String wifiBSSID = await _wifiInfo.getWifiBSSID();
         setState(() {
           _connectionStatus = '$result\n'
-              'Wifi Name: $wifiName\n'
               'Wifi BSSID: $wifiBSSID';
         });
     }
-
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -133,6 +156,31 @@ class _HomePageState extends State<HomePage> {
     return _updateConnectionStatus(result);
   }
 
+  Future<void> _updatePost(phone, password, bssid, macAddress) async {
+    // set up POST request arguments
+    if (_uuid == 'none') return;
+    Map<String, String> headers = {"Content-type": "application/json"};
+    Map<String, dynamic> json = new Map();
+    json['phoneNumber'] = phone;
+    json['bssid'] = _bssid;
+    json['macAddress'] = _uuid;
+    // make POST request
+    Response response =
+    await post(url, headers: headers, body: json.toString());
+    // check the status code for the result
+    int statusCode = response.statusCode;
+    print("Post Response Code: " + statusCode.toString());
+    // this API passes back the id of the new item added to the body
+    String body = response.body;
+    print("Post Response Body: " + body.toString());
+
+    // {
+    //   "phone": "0490777777",
+    //   "bssid": some_network,
+    //   "macAddress": 9C-35-5B-5F-4C-D7,
+    // }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -156,32 +204,5 @@ class _HomePageState extends State<HomePage> {
           tooltip: 'Update connection status',
           child: Icon(Icons.refresh)),
     );
-  }
-
-  Future<void> _updatePost(phone, password, bssid, macAddress) async {
-    // set up POST request arguments
-    String url = "http://be5a5dbe9d99.ngrok.io/api/check-in";
-    Map<String, String> headers = {"Content-type": "application/json"};
-    Map<String, dynamic> json = new Map();
-    json['phoneNumber'] = phone;
-    json['password'] = pwd;
-    json['bssid'] = _bssid;
-    json['macAddress'] = 'b';
-    // make POST request
-    Response response =
-        await post(url, headers: headers, body: json.toString());
-    // check the status code for the result
-    int statusCode = response.statusCode;
-    print("Post Response Code: " + statusCode.toString());
-    // this API passes back the id of the new item added to the body
-    String body = response.body;
-    print("Post Response Body: " + body.toString());
-
-    // {
-    //   "phone": "0490777777",
-    //   "password": "12345",
-    //   "bssid": some_network,
-    //   "macAddress": 9C-35-5B-5F-4C-D7,
-    // }
   }
 }

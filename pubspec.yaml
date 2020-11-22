@@ -27,9 +27,9 @@ dependencies:
   connectivity: ^0.4.2
   wifi_info_flutter: ^1.0.1
   permission_handler: ^5.0.1
+  shared_preferences: ^0.5.11
   localstorage: ^3.0.3+6
   local_auth: ^0.4.0+1
-#  uuid: ^2.2.2
   crypto: ^2.1.5
   workmanager: ^0.2.3
 
