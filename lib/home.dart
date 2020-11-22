@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:wifi_info_flutter/wifi_info_flutter.dart';
 import 'package:workmanager/workmanager.dart';
 
 class HomePage extends StatefulWidget {
@@ -27,19 +28,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-<<<<<<< HEAD
-=======
   _HomePageState({@required this.phone, @required this.pwd});
 
   String phone;
   String pwd;
   String uuid = "b";
->>>>>>> 8cffaa494f951eecbc782196750b07f42755b8d2
   String _connectionStatus = 'unknown';
   String _ssid = 'unknown';
   String _bssid = 'unknown';
   Timer timer;
   final Connectivity _connectivity = Connectivity();
+  final WifiInfo _wifiInfo = WifiInfo();
   StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
   @override
@@ -77,6 +76,22 @@ class _HomePageState extends State<HomePage> {
     timer?.cancel();
     Workmanager.cancelByUniqueName("updateNetworkStatus");
     super.dispose();
+  }
+
+  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+    setState(() => _connectionStatus = result.toString());
+    switch (result) {
+      case ConnectivityResult.wifi:
+        String wifiName, wifiBSSID, wifiIP;
+        wifiName = await _wifiInfo.getWifiName();
+        wifiBSSID = await _wifiInfo.getWifiBSSID();
+        setState(() {
+          _connectionStatus = '$result\n'
+              'Wifi Name: $wifiName\n'
+              'Wifi BSSID: $wifiBSSID';
+        });
+    }
+
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -128,9 +143,9 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('ConnectivityType: $_connectionStatus\n'
-                'SSID: $_ssid\n'
-                'BSSID: $_bssid\n'
+            Text('ConnectivityType: $_connectionStatus'
+                // 'SSID: $_ssid\n'
+                // 'BSSID: $_bssid\n'
                 'phone: $phone\n'
                 'pwd: $pwd\n')
           ],
@@ -141,12 +156,6 @@ class _HomePageState extends State<HomePage> {
           tooltip: 'Update connection status',
           child: Icon(Icons.refresh)),
     );
-  }
-
-  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
-    setState(() => _connectionStatus = result.toString());
-    setState(() async => _ssid = await _connectivity.getWifiName());
-    setState(() async => _bssid = await _connectivity.getWifiBSSID());
   }
 
   Future<void> _updatePost(phone, password, bssid, macAddress) async {

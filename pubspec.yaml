@@ -25,6 +25,7 @@ dependencies:
     sdk: flutter
   http: ^0.12.0+4
   connectivity: ^0.4.2
+  wifi_info_flutter: ^1.0.1
   permission_handler: ^5.0.1
   localstorage: ^3.0.3+6
   local_auth: ^0.4.0+1

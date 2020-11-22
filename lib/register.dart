@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 // import 'package:connectivity/connectivity.dart';
 import 'package:local_auth/local_auth.dart';
 // import 'package:http/http.dart';
-import 'package:uuid/uuid.dart';
+// import 'package:uuid/uuid.dart';
 
 class RegisterForm extends StatefulWidget {
   @override
@@ -156,23 +156,23 @@ class RegisterState extends State<RegisterForm> {
                 if (_formKey.currentState.validate()) {
                   _authenticate();
                   // if form is valid, generate a uuid
-                  var uuid = Uuid();
-                  var id = uuid.v4().toString();
+                  // var uuid = Uuid();
+                  // var id = uuid.v4().toString();
 
                   // If the form is valid, display a Snackbar.
-                  Scaffold.of(context)
-                      .showSnackBar(SnackBar(content: Text('Processing Data')));
-
-                  // display uuid generated
-                  return showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                            title: Text('New uuid'),
-                            content: Text('Your uuid is: $id')
-                        );
-                      }
-                  );
+                  // Scaffold.of(context)
+                  //     .showSnackBar(SnackBar(content: Text('Processing Data')));
+                  //
+                  // // display uuid generated
+                  // return showDialog(
+                  //     context: context,
+                  //     builder: (context) {
+                  //       return AlertDialog(
+                  //           title: Text('New uuid'),
+                  //           content: Text('Your uuid is: $id')
+                  //       );
+                  //     }
+                  // );
                 }
               },
               child: Text(
