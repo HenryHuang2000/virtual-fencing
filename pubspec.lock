@@ -79,7 +79,7 @@ packages:
     source: hosted
     version: "2.1.1"
   crypto:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: crypto
       url: "https://pub.dartlang.org"
@@ -92,6 +92,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
+  date_format:
+    dependency: "direct main"
+    description:
+      name: date_format
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.9"
   fake_async:
     dependency: transitive
     description:
@@ -128,20 +135,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.4"
-  intl:
-    dependency: transitive
-    description:
-      name: intl
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.15.8"
-  local_auth:
-    dependency: "direct main"
-    description:
-      name: local_auth
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.4.0+1"
   matcher:
     dependency: transitive
     description:
@@ -280,13 +273,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
-  workmanager:
-    dependency: "direct main"
-    description:
-      name: workmanager
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.2.3"
 sdks:
   dart: ">=2.10.0-110 <2.11.0"
   flutter: ">=1.20.0 <2.0.0"

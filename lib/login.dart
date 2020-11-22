@@ -1,9 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'home.dart';
@@ -23,15 +20,8 @@ class LoginState extends State<LoginForm> {
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
 
-  LocalAuthentication auth = LocalAuthentication();
-  bool _canCheckBiometric;
-  List<BiometricType> _availableBiometric;
-  bool authorised = false;
-
   @override
   void initState() {
-    _checkBiometric();
-    _getAvailableBiometrics();
     _initialiseLocals();
     super.initState();
   }
@@ -44,52 +34,6 @@ class LoginState extends State<LoginForm> {
       phoneController.text = '$localPhone';
       passwordController.text = '$localPwd';
     }
-  }
-
-  Future<void> _checkBiometric() async {
-    bool canCheckBiometric;
-    try {
-      canCheckBiometric = await auth.canCheckBiometrics;
-    } on PlatformException catch (e) {
-      print(e);
-    }
-    if (!mounted) return;
-
-    setState(() {
-      _canCheckBiometric = canCheckBiometric;
-    });
-  }
-
-  Future<void> _getAvailableBiometrics() async {
-    List<BiometricType> availableBiometric;
-    try {
-      availableBiometric = await auth.getAvailableBiometrics();
-    } on PlatformException catch (e) {
-      print(e);
-    }
-    if (!mounted) return;
-
-    setState(() {
-      _availableBiometric = availableBiometric;
-    });
-  }
-
-  Future<void> _authenticate() async {
-    bool authenticated = false;
-    try {
-      authenticated = await auth.authenticateWithBiometrics(
-          localizedReason: "Scan your finger print to authenticate",
-          useErrorDialogs: true,
-          stickyAuth: false);
-    } on PlatformException catch (e) {
-      print(e);
-    }
-    if (!mounted) return;
-
-    setState(() => authorised = authenticated);
-    // if (authenticated) {
-    //   Navigator.pushNamed(context, '/home');
-    // }
   }
 
   _handleSubmit() async {

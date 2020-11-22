@@ -11,6 +11,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:wifi_info_flutter/wifi_info_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:date_format/date_format.dart';
 
 class HomePage extends StatefulWidget {
   HomePage(
@@ -37,6 +38,7 @@ class _HomePageState extends State<HomePage> {
   String _uuid = 'none';
   String _connectionStatus = 'unknown';
   String _bssid = 'unknown';
+  List<String> _records = [];
   Timer timer;
   final Connectivity _connectivity = Connectivity();
   final WifiInfo _wifiInfo = WifiInfo();
@@ -51,13 +53,15 @@ class _HomePageState extends State<HomePage> {
         _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     _initialiseLocals();
 
-    timer = Timer.periodic(Duration(seconds: 20),
+    timer = Timer.periodic(Duration(seconds: 30),
         (Timer t) => _updatePost());
   }
 
   _initialiseLocals () async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String id = prefs.getString('id');
+    List<String> records = prefs.getStringList('records');
+    if (records != null) setState(() => _records = records);
     if (id != null) {
       setState(() => _uuid = id);
     } else {
@@ -65,6 +69,39 @@ class _HomePageState extends State<HomePage> {
       setState(() => _uuid = uuid);
       prefs.setString('id', _uuid);
     }
+  }
+
+  _updateRecords (record) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (_records == null) {
+      List<String> newList = [];
+      prefs.setStringList('records', newList);
+      setState(() => _records = []);
+    }
+    _records.add(record);
+    if (_records.length == 50) _records.remove(_records.first);
+    setState(() => _records = _records);
+    prefs.setStringList('records', _records);
+  }
+
+  String formatRecords (idx, request) {
+    String record = _records[idx];
+    Map data = json.decode(record);
+    String ret;
+    switch (request) {
+      case "time":
+        var timeObj = data['last_check_in'];
+        if (timeObj == null) return "";
+        ret = formatDate(DateTime.parse(timeObj), [dd, '-', mm, '-', yyyy, ' ', hh, ':', nn, ':', ss]);
+        break;
+      case "info":
+        var infoObj = data['url'];
+        if (infoObj == null) return "";
+        print(infoObj);
+        ret = infoObj.toString();
+        break;
+    }
+    return (ret != null) ? ret : "";
   }
 
   Future<String> postData(url, data) async {
@@ -140,11 +177,12 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _updatePost() async {
     // set up POST request arguments
-    print(_uuid);
     if (_uuid == 'none') return;
     String sendPkt = '{"phoneNumber": "$phone", "bssid": "$_bssid", "macAddress": "$_uuid"}';
     // make POST request
     String response = await postData(url, sendPkt);
+    _updateRecords(response);
+
     Map resData = json.decode(response);
 
     // {
@@ -164,9 +202,40 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('ConnectivityType: $_connectionStatus\n'
-                'phone: $phone\n'
-                'pwd: $pwd\n')
+            Expanded(
+              child: ListView.builder (
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemCount: _records.length,
+                itemBuilder: (context, idx) {
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 16.0),
+                    child: Card(
+                      color: Colors.white,
+                      child: Column (
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
+                            child: Text(formatRecords(idx, "time"), style: TextStyle(
+                              fontSize: 18.0,
+                              height: 1.6,
+                            ),),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
+                            child: Text(formatRecords(idx, "info"), style: TextStyle(
+                              fontSize: 12.0,
+                              height: 1.6,
+                            ),),
+                          )
+                        ],
+                      ),
+                    )
+                  );
+                }
+              ),
+            ),
           ],
         ),
       ),
