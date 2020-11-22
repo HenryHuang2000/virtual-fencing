@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:localstorage/localstorage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'home.dart';
@@ -23,8 +22,6 @@ class LoginState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
-  final LocalStorage storage = new LocalStorage('virtual_fencing');
-
 
   LocalAuthentication auth = LocalAuthentication();
   bool _canCheckBiometric;
@@ -41,7 +38,7 @@ class LoginState extends State<LoginForm> {
 
   _initialiseLocals () async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int localPhone = prefs.getInt('phone');
+    String localPhone = prefs.getString('phone');
     String localPwd = prefs.getString('pwd');
     if (localPhone != null && localPwd != null) {
       phoneController.text = '$localPhone';
@@ -100,7 +97,7 @@ class LoginState extends State<LoginForm> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       // var phoneBytes = utf8.encode(phoneController.text);
       // var pwdBytes = utf8.encode(passwordController.text);
-      await prefs.setInt('phone', int.parse(phoneController.text));
+      await prefs.setString('phone', phoneController.text);
       await prefs.setString('pwd', passwordController.text);
       // _authenticate();
       Navigator.push(
